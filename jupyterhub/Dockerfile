@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 FROM azul/zulu-openjdk:17-latest as java
 
-FROM spark:3.11 as spark
+FROM parjanya/spark:331 as spark
 
 FROM debian:11 as node
 

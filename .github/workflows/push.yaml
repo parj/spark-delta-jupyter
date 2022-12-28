@@ -25,21 +25,42 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Build and push
+      - name: Build and push Spark
         uses: docker/build-push-action@v3
         with:
           context: ./spark/
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ env.IMAGE_NAME_SPARK }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-      - name: Scan local container image
+      - name: Build and push Jupyterhub
+        uses: docker/build-push-action@v3
+        with:
+          context: ./jupyterhub/
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ env.IMAGE_NAME_JUPYTER }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Scan Spark container image
         uses: anchore/scan-action@v3
         id: scan
         with:
           image: ${{ env.IMAGE_NAME_SPARK }}
+          fail-build: false
+          #severity-cutoff: critical
+          acs-report-enable: true
+
+      - name: Scan Jupyterhub container image
+        uses: anchore/scan-action@v3
+        id: scan
+        with:
+          image: ${{ env.IMAGE_NAME_JUPYTER }}
           fail-build: false
           #severity-cutoff: critical
           acs-report-enable: true
