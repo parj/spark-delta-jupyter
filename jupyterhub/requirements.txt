@@ -1,0 +1,9 @@
+#Pinned versions
+pyspark==3.3.1 
+jupyterhub==3.1.0 
+delta-spark==2.2.0
+
+#Any version
+jupyter_server >= 2.0.5 
+jupyterlab >= 3.5.2 
+jupyterlab-code-formatter >= 1.5.3 
