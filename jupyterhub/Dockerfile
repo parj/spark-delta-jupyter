@@ -26,6 +26,7 @@ ARG USER=spark
 ARG GROUP=tools
 ARG UID=1001
 ENV NPM_VERSION 9.2.0
+ENV JUPYTERHUB_HOME="/opt/jupyterhub"
 ARG JAVA_HOME="/usr/lib/jvm/zulu17"
 
 COPY --from=java ["/usr/lib/jvm/zulu17/", "${JAVA_HOME}"]
@@ -37,7 +38,10 @@ ENV PATH="$JAVA_HOME/bin:$PATH:/node/bin"
 
 RUN addgroup ${GROUP} --gid ${UID} && useradd --uid ${UID} --gid ${UID} --create-home --shell /bin/bash ${USER} \
 && pip3 install -r /requirements.txt \
-&& pip cache purge
+&& pip uninstall -y terminado \ 
+&& pip cache purge \
+&& mkdir -p "$JUPYTERHUB_HOME" \
+&& chown -R spark:tools "$JUPYTERHUB_HOME"
 
 RUN npm install -g npm@"$NPM_VERSION" \
   && npm install -g configurable-http-proxy \
@@ -49,8 +53,12 @@ COPY --from=spark ["/opt/spark/jars/*delta*.jar", "/usr/local/lib/python3.11/sit
 # && jupyter lab clean \
 # && rm -rf /usr/local/share/.cache
 
-USER root
+#COPY --chown=spark:tools jupyterhub_config.py "$JUPYTERHUB_HOME"
 
-COPY jupyterhub_config.py /
+COPY --chown=spark:tools ["rootfs/", "/"]
 
-ENTRYPOINT [ "jupyterhub", "-f", "/jupyterhub_config.py" ]
+USER spark
+
+WORKDIR /opt/jupyterhub
+
+ENTRYPOINT [ "jupyterhub", "-f", "./jupyterhub_config.py" ]

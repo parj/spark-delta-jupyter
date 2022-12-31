@@ -1,0 +1,17 @@
+{
+  "argv": [
+   "python",
+   "-m",
+   "ipykernel_launcher",
+   "-f",
+   "{connection_file}"
+  ],
+  "env": {
+    "PYSPARK_SUBMIT_ARGS": "--master 'spark://master:7077' --conf 'spark.sql.extensions'='io.delta.sql.DeltaSparkSessionExtension' --conf 'spark.sql.catalog.spark_catalog'='org.apache.spark.sql.delta.catalog.DeltaCatalog' pyspark-shell"
+  },
+  "display_name": "Spark (Docker)",
+  "language": "python",
+  "metadata": {
+   "debugger": true
+  }
+ }

@@ -9,7 +9,7 @@ FROM debian as curl
 ARG SPARK_VERSION
 ARG DELTA_VERSION
 
-#Purposely split to ensure runs is cached
+#Purposely split to ensure run is cached
 RUN apt update && apt install -y curl unzip
 
 RUN curl -SL "https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop3.tgz" -o /tmp/spark.tgz
@@ -20,9 +20,18 @@ RUN tar xvzf /tmp/spark.tgz -C /tmp/ && mv /tmp/spark-3.3.1-bin-hadoop3 /tmp/spa
 RUN curl -SL "https://repo1.maven.org/maven2/io/delta/delta-core_2.12/${DELTA_VERSION}/delta-core_2.12-${DELTA_VERSION}.jar" -o /tmp/spark/jars/delta-core_2.12-2.2.0.jar && \
 curl -SL "https://repo1.maven.org/maven2/io/delta/delta-storage/${DELTA_VERSION}/delta-storage-${DELTA_VERSION}.jar" -o /tmp/spark/jars/delta-storage-2.2.0.jar
 
-#Explode snappy
+#Explode snappy and zstd
 RUN ls -1  /tmp/spark/jars/*snappy* | xargs -I % unzip % -d /tmp/snappy && \
-ls -1  /tmp/spark/jars/*zstd* | xargs -I % unzip % -d /tmp/zstd
+ls -1  /tmp/spark/jars/*zstd* | xargs -I % unzip % -d /tmp/zstd && \
+dpkgArch="$(dpkg --print-architecture)" && \
+case "$dpkgArch" in \
+  amd64)  cp /tmp/zstd/linux/amd64/libzstd-jni-*.so /usr/local/lib && \ 
+          cp /tmp/snappy/org/xerial/snappy/native/Linux/x86_64/libsnappyjava.so /usr/local/lib ;; \
+  x86)    cp /tmp/zstd/linux/i386/libzstd-jni-*.so /usr/local/lib && \ 
+          cp /tmp/snappy/org/xerial/snappy/native/Linux/x86/libsnappyjava.so /usr/local/lib ;; \
+  arm64)  cp /tmp/zstd/linux/aarch64/libzstd-jni-*.so /usr/local/lib && \ 
+          cp /tmp/snappy/org/xerial/snappy/native/Linux/aarch64/libsnappyjava.so /usr/local/lib ;; \
+esac;
 
 FROM python:3.11.1
 
@@ -44,9 +53,9 @@ COPY --from=java ["/usr/lib/jvm/zulu17/", "${JAVA_HOME}"]
 
 COPY --from=curl --chown=${SPARK}:${GROUP} ["/tmp/spark/", "${SPARK_HOME}"]
 
-COPY --from=curl ["/tmp/zstd/linux/amd64/libzstd-jni-*.so", "/usr/local/lib/"]
+COPY --from=curl ["/usr/local/lib/libzstd-jni-*.so", "/usr/local/lib/"]
 
-COPY --from=curl ["/tmp/snappy/org/xerial/snappy/native/Linux/x86_64/libsnappyjava.so", "/usr/local/lib/"]
+COPY --from=curl ["/usr/local/lib/libsnappyjava.so", "/usr/local/lib/"]
 
 COPY --chown=${SPARK}:${GROUP} ["rootfs", "/"]
 
