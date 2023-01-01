@@ -11,14 +11,20 @@ ENV NPM_VERSION 9.2.0
 RUN apt update && apt install -y --install-recommends gpg curl
 
 RUN gpg --batch --keyserver keyserver.ubuntu.com --recv-keys B9E2F5981AA6E0CD28160D9FF13993A75599653C C82FA3AE1CBEDC6BE46B9360C43CEC45C17AB93C \
- 	&& curl -SLO "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.gz" \
+    && dpkgArch="$(dpkg --print-architecture)" \
+    && architecture="x64" \
+    && case "$dpkgArch" in \
+      arm64)  architecture="arm64" ;; \
+    esac; \
+  echo "architecture set to $architecture" \
+ 	&& curl -SLO "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-$architecture.tar.gz" \
 	&& curl -SLO "https://nodejs.org/dist/v$NODE_VERSION/SHASUMS256.txt" \
 	&& curl -SLO "https://nodejs.org/dist/v$NODE_VERSION/SHASUMS256.txt.asc" \
 	&& curl -SLO "https://nodejs.org/dist/v$NODE_VERSION/SHASUMS256.txt.sig" \
 	&& gpg --verify SHASUMS256.txt.sig SHASUMS256.txt \
-	&& grep " node-v$NODE_VERSION-linux-x64.tar.gz\$" SHASUMS256.txt.asc | sha256sum -c - \
+	&& grep " node-v$NODE_VERSION-linux-$architecture.tar.gz\$" SHASUMS256.txt.asc | sha256sum -c - \
   && mkdir /node \
-	&& tar xvzf "node-v$NODE_VERSION-linux-x64.tar.gz" -C /node --strip-components=1
+	&& tar xvzf "node-v$NODE_VERSION-linux-$architecture.tar.gz" -C /node --strip-components=1
 
 FROM python:3.11.1
 
