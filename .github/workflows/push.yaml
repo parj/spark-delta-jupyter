@@ -10,7 +10,7 @@ env:
   IMAGE_NAME_JUPYTER: "parjanya/jupyterhub_spark331"
 
 jobs:
-  release-on-push:
+  release:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -27,9 +27,14 @@ jobs:
           echo "Got release version ${{ steps.release.outputs.version }}"
 
   spark:
-    needs: release-on-push
+    needs: release
     runs-on: ubuntu-latest
     steps:
+      - name: Check Output Parameters
+        run: |
+          echo "Got tag name ${{ needs.release.outputs.tag_name }}"
+          echo "Got release version ${{ needs.release.outputs.version }}"
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
 
@@ -57,7 +62,7 @@ jobs:
 
 
   jupterhub:
-    needs: [release-on-push, spark]
+    needs: [release, spark]
     runs-on: ubuntu-latest
     steps:
       - name: Set up QEMU
