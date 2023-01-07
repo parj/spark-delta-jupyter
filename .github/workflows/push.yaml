@@ -10,7 +10,6 @@ env:
   IMAGE_NAME_JUPYTER: "parjanya/jupyterhub_spark331"
 
 jobs:
-
   release-on-push:
     runs-on: ubuntu-latest
     env:
@@ -28,6 +27,7 @@ jobs:
           echo "Got release version ${{ steps.release.outputs.version }}"
 
   spark:
+    needs: release-on-push
     runs-on: ubuntu-latest
     steps:
       - name: Set up QEMU
