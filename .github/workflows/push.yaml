@@ -51,13 +51,13 @@ jobs:
           context: ./spark/
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ env.IMAGE_NAME_SPARK }}:${{ steps.release.outputs.tag_name }},${{ env.IMAGE_NAME_SPARK }}:latest
+          tags: ${{ env.IMAGE_NAME_SPARK }}:${{ needs.release.outputs.tag_name }},${{ env.IMAGE_NAME_SPARK }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
 
   jupterhub:
-    needs: spark
+    needs: [release-on-push, spark]
     runs-on: ubuntu-latest
     steps:
       - name: Set up QEMU
@@ -81,7 +81,7 @@ jobs:
           context: ./jupyterhub/
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ env.IMAGE_NAME_JUPYTER }}:${{ steps.release.outputs.tag_name }},${{ env.IMAGE_NAME_JUPYTER }}:latest
+          tags: ${{ env.IMAGE_NAME_JUPYTER }}:${{ needs.release.outputs.tag_name }},${{ env.IMAGE_NAME_JUPYTER }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
