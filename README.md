@@ -1,5 +1,7 @@
 # spark-delta-jupyter
 
+![CI & Push Build](https://github.com/parj/spark-delta-jupyter/actions/workflows/push.yaml/badge.svg)
+
 This builds a spark image with delata on it. It's being used to test spark setup. The image contains the following
 
 | Name        | Version     |
