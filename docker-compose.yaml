@@ -4,11 +4,12 @@ services:
   master:
     ports:
       - "8080:8080"
-    image: parjanya/spark:331
+      - "7077:7077"
+    image: parjanya/spark331:latest
     environment:
       - SPARK_MODE=master
   worker:
-    image: parjanya/spark:331
+    image: parjanya/spark331:latest
     depends_on:
       - master
     environment:
@@ -18,7 +19,7 @@ services:
     volumes:
       - spark-data:/workspace
   thrift:
-    image: parjanya/spark:331
+    image: parjanya/spark331:latest
     depends_on:
       - master
     environment:
@@ -27,7 +28,7 @@ services:
     volumes:
       - spark-data:/workspace
   jupyerhub:
-    image: parjanya/jupyterhub:spark331
+    image: parjanya/jupyterhub_spark331:latest
     volumes:
       - spark-data:/workspace
     ports:

@@ -6,10 +6,26 @@ on:
       - 'main'
 
 env:
-  IMAGE_NAME_SPARK: "parjanya/spark:331"
-  IMAGE_NAME_JUPYTER: "parjanya/jupyterhub:spark331"
+  IMAGE_NAME_SPARK: "parjanya/spark331"
+  IMAGE_NAME_JUPYTER: "parjanya/jupyterhub_spark331"
 
 jobs:
+
+  release-on-push:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: rymndhng/release-on-push-action@master
+        with:
+          bump_version_scheme: minor
+          use_github_release_notes: true
+
+      - name: Check Output Parameters
+        run: |
+          echo "Got tag name ${{ steps.release.outputs.tag_name }}"
+          echo "Got release version ${{ steps.release.outputs.version }}"
+
   spark:
     runs-on: ubuntu-latest
     steps:
@@ -34,27 +50,10 @@ jobs:
           context: ./spark/
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ env.IMAGE_NAME_SPARK }}
+          tags: ${{ env.IMAGE_NAME_SPARK }}:${{ steps.release.outputs.tag_name }},${{ env.IMAGE_NAME_SPARK }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # - name: Scan Spark container image
-      #   uses: anchore/scan-action@v3
-      #   id: scan_spark
-      #   with:
-      #     image: ${{ env.IMAGE_NAME_SPARK }}
-      #     fail-build: false
-          #severity-cutoff: critical
-          #acs-report-enable: true
-
-      # - name: upload Anchore scan SARIF report
-      #   uses: github/codeql-action/upload-sarif@v1
-      #   with:
-      #     sarif_file: ${{ steps.scan.outputs.sarif }}
-
-      # - name: Inspect action SARIF report
-      #   if: always()
-      #   run: cat ${{ steps.scan.outputs.sarif }}
 
   jupterhub:
     needs: spark
@@ -81,24 +80,8 @@ jobs:
           context: ./jupyterhub/
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ env.IMAGE_NAME_JUPYTER }}
+          tags: ${{ env.IMAGE_NAME_JUPYTER }}:${{ steps.release.outputs.tag_name }},${{ env.IMAGE_NAME_JUPYTER }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # - name: Scan Jupyterhub container image
-      #   uses: anchore/scan-action@v3
-      #   id: scan_jupyterhub
-      #   with:
-      #     image: ${{ env.IMAGE_NAME_JUPYTER }}
-          fail-build: false
-          #severity-cutoff: critical
-          #acs-report-enable: true
 
-      # - name: upload Anchore scan SARIF report
-      #   uses: github/codeql-action/upload-sarif@v1
-      #   with:
-      #     sarif_file: ${{ steps.scan.outputs.sarif }}
-
-      # - name: Inspect action SARIF report
-      #   if: always()
-      #   run: cat ${{ steps.scan.outputs.sarif }}
