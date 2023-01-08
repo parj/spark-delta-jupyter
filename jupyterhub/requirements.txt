@@ -7,3 +7,4 @@ delta-spark==2.2.0
 jupyter_server >= 2.0.5 
 jupyterlab >= 3.5.2 
 jupyterlab-code-formatter >= 1.5.3 
+polars[all] >= 0.15.13

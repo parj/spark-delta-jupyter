@@ -2,7 +2,7 @@
 ARG SPARK_VERSION=3.3.1
 ARG DELTA_VERSION=2.2.0
 
-FROM azul/zulu-openjdk:17-latest as java
+FROM azul/zulu-openjdk:17-jre-headless-latest as java
 
 FROM debian as curl
 
@@ -33,7 +33,7 @@ case "$dpkgArch" in \
           cp /tmp/snappy/org/xerial/snappy/native/Linux/aarch64/libsnappyjava.so /usr/local/lib ;; \
 esac;
 
-FROM python:3.11.1
+FROM python:3.11.1-slim-buster
 
 ARG SPARK=spark
 ARG GROUP=tools
@@ -46,6 +46,12 @@ USER root
 RUN addgroup ${GROUP} --gid ${UID} && useradd --uid ${UID} --gid ${UID} --create-home --shell /bin/bash ${SPARK} && \
 mkdir -p /opt/spark && \ 
 chown -R ${SPARK}:${GROUP} ${SPARK_HOME}
+
+#Spark looks for ps
+RUN apt update && apt install -y procps && \
+  apt-get clean autoclean && \
+  apt-get autoremove --yes && \
+  rm -rf /var/lib/{apt,dpkg,cache,log}
 
 USER spark
 

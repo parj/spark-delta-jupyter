@@ -82,6 +82,10 @@ spark = SparkSession.builder \
 
 For testing delta - there is a shared volume created by docker-compose. The shared volume is mount on spark worker and jupyterhub. Delta requires read-write from the driver and worker.
 
+### Using spark
+
+Get the spark session as above
+
 ```python
 #Write test
 data = spark.range(0, 5)
@@ -91,6 +95,19 @@ data.write.format("delta").save("/workspace/delta-table")
 df = spark.read.format("delta").load("/workspace/delta-table")
 df.show()
 ```
+
+### Using polar.rs
+
+```python
+import polars as pl
+
+table_path = "/workspace/delta-table"
+
+df = pl.read_delta(table_path)  
+
+print(df)
+```
+
 
 ## To build
 

@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM azul/zulu-openjdk:17-latest as java
+FROM azul/zulu-openjdk:17-jre-headless-latest as java
 
 FROM parjanya/spark:331 as spark
 
@@ -26,7 +26,7 @@ RUN gpg --batch --keyserver keyserver.ubuntu.com --recv-keys B9E2F5981AA6E0CD281
   && mkdir /node \
 	&& tar xvzf "node-v$NODE_VERSION-linux-$architecture.tar.gz" -C /node --strip-components=1
 
-FROM python:3.11.1
+FROM python:3.11.1-slim-buster
 
 ARG USER=spark
 ARG GROUP=tools
@@ -41,6 +41,12 @@ COPY ["requirements.txt", "/"]
 
 ENV JAVA_HOME="${JAVA_HOME}"
 ENV PATH="$JAVA_HOME/bin:$PATH:/node/bin"
+
+#Spark looks for ps
+RUN apt update && apt install -y procps && \
+  apt-get clean autoclean && \
+  apt-get autoremove --yes && \
+  rm -rf /var/lib/{apt,dpkg,cache,log}
 
 RUN addgroup ${GROUP} --gid ${UID} && useradd --uid ${UID} --gid ${UID} --create-home --shell /bin/bash ${USER} \
 && pip3 install -r /requirements.txt \
