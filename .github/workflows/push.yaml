@@ -6,8 +6,8 @@ on:
       - 'main'
 
 env:
-  IMAGE_NAME_SPARK: "parjanya/spark331"
-  IMAGE_NAME_JUPYTER: "parjanya/jupyterhub_spark331"
+  IMAGE_NAME_SPARK: "parjanya/spark:3.4.0"
+  IMAGE_NAME_JUPYTER: "parjanya/jupyterhub3:spark340"
 
 jobs:
   release:

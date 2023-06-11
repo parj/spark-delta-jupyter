@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
-ARG SPARK_VERSION=3.3.1
-ARG DELTA_VERSION=2.2.0
+ARG SPARK_VERSION=3.4.0
+ARG DELTA_VERSION=2.4.0
 
 FROM azul/zulu-openjdk:17-jre-headless-latest as java
 
@@ -12,13 +12,13 @@ ARG DELTA_VERSION
 #Purposely split to ensure run is cached
 RUN apt update && apt install -y curl unzip
 
-RUN curl -SL "https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop3.tgz" -o /tmp/spark.tgz
+RUN curl -SL "https://dlcdn.apache.org/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop3.tgz" -o /tmp/spark.tgz
 
-RUN tar xvzf /tmp/spark.tgz -C /tmp/ && mv /tmp/spark-3.3.1-bin-hadoop3 /tmp/spark
+RUN tar xvzf /tmp/spark.tgz -C /tmp/ && mv /tmp/spark-${SPARK_VERSION}-bin-hadoop3 /tmp/spark
 
 #Delta jars
-RUN curl -SL "https://repo1.maven.org/maven2/io/delta/delta-core_2.12/${DELTA_VERSION}/delta-core_2.12-${DELTA_VERSION}.jar" -o /tmp/spark/jars/delta-core_2.12-2.2.0.jar && \
-curl -SL "https://repo1.maven.org/maven2/io/delta/delta-storage/${DELTA_VERSION}/delta-storage-${DELTA_VERSION}.jar" -o /tmp/spark/jars/delta-storage-2.2.0.jar
+RUN curl -SL "https://repo1.maven.org/maven2/io/delta/delta-core_2.12/${DELTA_VERSION}/delta-core_2.12-${DELTA_VERSION}.jar" -O --output-dir /tmp/spark/jars/ && \
+curl -SL "https://repo1.maven.org/maven2/io/delta/delta-storage/${DELTA_VERSION}/delta-storage-${DELTA_VERSION}.jar" -O --output-dir /tmp/spark/jars/
 
 #Explode snappy and zstd
 RUN ls -1  /tmp/spark/jars/*snappy* | xargs -I % unzip % -d /tmp/snappy && \
@@ -33,7 +33,7 @@ case "$dpkgArch" in \
           cp /tmp/snappy/org/xerial/snappy/native/Linux/aarch64/libsnappyjava.so /usr/local/lib ;; \
 esac;
 
-FROM python:3.11.1-slim-buster
+FROM python:3.11.4-slim-buster
 
 ARG SPARK=spark
 ARG GROUP=tools
