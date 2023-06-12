@@ -1,7 +1,8 @@
-# syntax=docker/dockerfile:1
+FROM spark:3.4.0 as spark
+
 FROM azul/zulu-openjdk:17-jre-headless-latest as java
 
-FROM parjanya/spark:331 as spark
+#FROM parjanya/spark:331 as spark
 
 FROM debian:11 as node
 
@@ -54,6 +55,8 @@ RUN npm install -g npm@"$NPM_VERSION" \
 	&& npm cache clear --force
 
 COPY --from=spark ["/opt/spark/jars/*delta*.jar", "/usr/local/lib/python3.11/site-packages/pyspark/jars/"]
+
+RUN jupyter labextension disable "@jupyterlab/apputils-extension:announcements"
 
 # RUN jupyter labextension install @telamonian/theme-darcula @oriolmirosa/jupyterlab_materialdarker \ 
 # && jupyter lab clean \

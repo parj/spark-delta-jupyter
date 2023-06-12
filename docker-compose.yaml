@@ -5,11 +5,11 @@ services:
     ports:
       - "8080:8080"
       - "7077:7077"
-    image: parjanya/spark331:latest
+    image: parjanya/spark:3.4.0
     environment:
       - SPARK_MODE=master
   worker:
-    image: parjanya/spark331:latest
+    image: parjanya/spark:3.4.0
     depends_on:
       - master
     environment:
@@ -18,8 +18,9 @@ services:
       - SPARK_WORKER_CORES=2
     volumes:
       - spark-data:/workspace
+      - ./data:/data
   thrift:
-    image: parjanya/spark331:latest
+    image: parjanya/spark:3.4.0
     depends_on:
       - master
     environment:
@@ -28,11 +29,15 @@ services:
     volumes:
       - spark-data:/workspace
   jupyerhub:
-    image: parjanya/jupyterhub_spark331:latest
+    image: parjanya/jupyterhub3:spark340
     volumes:
       - spark-data:/workspace
+      - ./data:/data
+      
     ports:
       - "8000:8000"
+  #Workaround to deal with jupyter and worker being able to write to the same volume
+  #In delta - the edge node writes the _deltalog, the worker writes the data
   debian:
     image: debian:latest
     entrypoint: "chmod 0777 -R /workspace"
