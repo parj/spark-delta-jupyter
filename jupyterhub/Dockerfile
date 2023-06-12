@@ -1,8 +1,6 @@
-FROM spark:3.4.0 as spark
+FROM parjanya/spark-340 as spark
 
 FROM azul/zulu-openjdk:17-jre-headless-latest as java
-
-#FROM parjanya/spark:331 as spark
 
 FROM debian:11 as node
 
