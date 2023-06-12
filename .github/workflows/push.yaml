@@ -6,7 +6,7 @@ on:
       - 'main'
 
 env:
-  IMAGE_NAME_SPARK: "parjanya/spark340"
+  IMAGE_NAME_SPARK: "parjanya/spark-340"
   IMAGE_NAME_JUPYTER: "parjanya/jupyterhub3-spark340"
 
 jobs:
